@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teledit</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 300px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      background: #17212b;
+      color: #e8f4fd;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #5eacd3;
+    }
+
+    /* ── 탭 네비게이션 ─────────────────────────────────────────────────────── */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #2b3d52;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 7px 0;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #6a8fa8;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: #aab8c5; }
+    .tab-btn.active {
+      color: #5eacd3;
+      border-bottom-color: #5eacd3;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── 공통 폼 ───────────────────────────────────────────────────────────── */
+    .field { margin-bottom: 12px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #aab8c5;
+      margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 7px 10px;
+      background: #242f3d;
+      border: 1px solid #344b60;
+      border-radius: 6px;
+      color: #e8f4fd;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus { border-color: #5eacd3; }
+
+    .btn {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+
+    .btn-primary { background: #5eacd3; color: #0e1621; }
+    .btn-primary:hover:not(:disabled) { opacity: 0.85; }
+
+    .btn-secondary {
+      background: #242f3d;
+      color: #aab8c5;
+      border: 1px solid #344b60;
+      margin-top: 8px;
+    }
+    .btn-secondary:hover:not(:disabled) { border-color: #5eacd3; color: #e8f4fd; }
+
+    /* ── 로그인됨 뷰 ───────────────────────────────────────────────────────── */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #aab8c5;
+      margin-bottom: 4px;
+    }
+    .info-row span:last-child { color: #e8f4fd; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .divider { border: none; border-top: 1px solid #2b3d52; margin: 14px 0; }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-label { font-size: 13px; }
+
+    .toggle { position: relative; width: 40px; height: 22px; }
+    .toggle input { display: none; }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #344b60;
+      border-radius: 22px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .slider { background: #5eacd3; }
+    .toggle input:checked + .slider::before { transform: translateX(18px); }
+
+    #status {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #6a8fa8;
+      min-height: 16px;
+    }
+
+    #update-banner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: #f0a500;
+      border-radius: 6px;
+    }
+
+    #update-link {
+      color: #1a1a1a;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    #update-link:hover { text-decoration: underline; }
+
+    /* ── 포지션 필터 섹션 ──────────────────────────────────────────────────── */
+    .pos-section { margin-top: 12px; }
+
+    .pos-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .pos-section-title {
+      font-size: 11px;
+      color: #aab8c5;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    #pos-refresh {
+      font-size: 11px;
+      color: #5eacd3;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    #pos-refresh:hover { text-decoration: underline; }
+
+    .pos-hint {
+      font-size: 11px;
+      color: #6a8fa8;
+      padding: 6px 0;
+    }
+
+    .pos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .pos-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: #242f3d;
+      border: 1px solid #2b3d52;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .pos-item:hover { border-color: #344b60; }
+
+    .pos-item input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: #5eacd3;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .pos-item-label {
+      font-size: 11px;
+      color: #e8f4fd;
+      font-family: monospace;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .pos-badge {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+    .pos-badge.open      { background: #1a3a5c; color: #5eacd3;  border: 1px solid #5eacd3; }
+    .pos-badge.closed-tp { background: #1a3d2a; color: #4caf7d;  border: 1px solid #4caf7d; }
+    .pos-badge.closed-sl { background: #3d1a1a; color: #e05c5c;  border: 1px solid #e05c5c; }
+
+    /* ── 포지션 섹션 그룹 ─────────────────────────────────────────────────── */
+    .pos-sections { display: flex; flex-direction: column; gap: 12px; }
+
+    .pos-group { }
+
+    .pos-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #2b3d52;
+    }
+
+    .pos-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #aab8c5;
+      letter-spacing: 0.02em;
+    }
+
+    .pos-group-count {
+      font-size: 10px;
+      color: #6a8fa8;
+      background: #242f3d;
+      padding: 1px 6px;
+      border-radius: 8px;
+    }
+
+    /* ── 커스텀 메시지 ─────────────────────────────────────────────────────── */
+    .cm-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 8px;
+      background: #242f3d;
+      border: 1px solid #2b3d52;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .cm-item:hover { border-color: #344b60; }
+    .cm-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #5eacd3; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+    .cm-item-info { flex: 1; min-width: 0; }
+    .cm-item-header { display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
+    .cm-item-num { font-size: 10px; font-weight: 600; color: #5eacd3; }
+    .cm-item-time { font-size: 10px; color: #6a8fa8; }
+    .cm-item-img { font-size: 9px; color: #4caf7d; }
+    .cm-item-text { font-size: 11px; color: #e8f4fd; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  </style>
+</head>
+<body>
+  <h1>Teledit</h1>
+
+  <!-- 탭 네비게이션 (탭이 하나뿐이므로 숨김) -->
+  <div id="tab-nav" class="tab-nav" style="display:none"></div>
+
+  <!-- 로그인 뷰 -->
+  <div id="view-login">
+    <div class="field">
+      <label for="email">아이디</label>
+      <input type="text" id="email" placeholder="아이디 입력" />
+    </div>
+    <div class="field">
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" placeholder="••••••••" />
+    </div>
+    <button class="btn btn-primary" id="btn-login">로그인</button>
+  </div>
+
+  <!-- 로그인됨 뷰 -->
+  <div id="view-main" style="display:none">
+
+    <!-- 탭: CryptoSim -->
+    <div id="tab-crypto" class="tab-content active">
+      <div class="info-row"><span>계정</span><span id="info-email"></span></div>
+      <hr class="divider" />
+      <button class="btn btn-primary" id="btn-insert" style="margin-bottom:8px">체크된 포지션 삽입</button>
+      <div id="insert-status" style="font-size:11px;color:#6a8fa8;min-height:14px;margin-bottom:4px"></div>
+      <div class="pos-section">
+        <div class="pos-section-header">
+          <span class="pos-section-title">포지션 필터</span>
+          <button id="pos-refresh">새로고침</button>
+        </div>
+        <div id="pos-list-wrap">
+          <div class="pos-hint">로딩 중...</div>
+        </div>
+      </div>
+      <hr class="divider" />
+      <!-- 커스텀 메시지 삽입 -->
+      <button class="btn btn-primary" id="btn-insert-cm" style="margin-bottom:8px">체크된 메시지 삽입</button>
+      <div id="cm-insert-status" style="font-size:11px;color:#6a8fa8;min-height:14px;margin-bottom:4px"></div>
+      <div class="pos-section">
+        <div class="pos-section-header">
+          <span class="pos-section-title">커스텀 메시지</span>
+          <button id="cm-refresh" style="font-size:11px;color:#5eacd3;cursor:pointer;background:none;border:none;padding:0">새로고침</button>
+        </div>
+        <div id="cm-list-wrap">
+          <div class="pos-hint">로딩 중...</div>
+        </div>
+      </div>
+      <button class="btn btn-secondary" id="btn-logout" style="margin-top:12px">로그아웃</button>
+    </div>
+
+  </div>
+
+  <div id="status"></div>
+  <div id="update-banner">
+    <button id="update-link"></button>
+  </div>
+
+  <div id="version-label" style="font-size:10px;color:#344b60;text-align:center;margin-top:8px"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

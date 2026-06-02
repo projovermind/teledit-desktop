@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Teledit",
+  "version": "1.0.0",
+  "description": "Teledit integration for Telegram Web",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "alarms",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://web.telegram.org/*",
+    "https://crypto-sim-nu.vercel.app/*",
+    "https://*.public.blob.vercel-storage.com/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.telegram.org/*"],
+      "js": ["page-script.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://web.telegram.org/*"],
+      "js": ["bundle.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["page-script.js"],
+      "matches": ["https://web.telegram.org/*"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Teledit"
+  }
+}

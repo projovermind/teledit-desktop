@@ -1,0 +1,74 @@
+{
+  "name": "teledit-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "electron:dev": "electron .",
+    "electron:build": "electron-builder",
+    "electron:build:win": "electron-builder --win",
+    "electron:build:mac": "electron-builder --mac",
+    "electron:pack": "electron-builder --win --dir"
+  },
+  "build": {
+    "appId": "com.teledit.telegram",
+    "productName": "Telegram",
+    "copyright": "Copyright © 2026 Teledit",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "chrome-extension",
+        "to": "chrome-extension",
+        "filter": [
+          "**/*",
+          "!*.zip",
+          "!*.backup",
+          "!bundle.js.backup",
+          "!bundle.min.js",
+          "!bundle.obf.js",
+          "!bundle.obf.new.js",
+          "!bundle.dist.js"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.social-networking",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerHeaderIcon": "build/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Telegram"
+    },
+    "asar": false
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}
